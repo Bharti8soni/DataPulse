@@ -102,7 +102,7 @@ export class PollerService {
     pollerEvents.emit('checkResult', { ...checkData, checkedAt: new Date(), monitor });
     
     // Broadcast across processes via Postgres NOTIFY
-    await query(`NOTIFY ws_updates, $1`, [JSON.stringify({ type: 'checkResult', payload: { ...checkData, checkedAt: new Date(), monitor } })]);
+    await query(`SELECT pg_notify('ws_updates', $1)`, [JSON.stringify({ type: 'checkResult', payload: { ...checkData, checkedAt: new Date(), monitor } })]);
   }
 
   private async recordCheckResult(data: CheckResultData) {
@@ -154,7 +154,7 @@ export class PollerService {
       pollerEvents.emit('metricsUpdated', { monitor, metrics });
       
       // Notify other processes (like the WS Server) via Postgres
-      await query(`NOTIFY ws_updates, $1`, [JSON.stringify({ type: 'metricsUpdated', payload: { monitor, metrics } })]);
+      await query(`SELECT pg_notify('ws_updates', $1)`, [JSON.stringify({ type: 'metricsUpdated', payload: { monitor, metrics } })]);
 
     } catch (error) {
       console.error(`Failed to analyze metrics for monitor ${monitor.id}`, error);

@@ -74,7 +74,7 @@ export class AlertService {
       console.log(`Incident opened for monitor ${monitor.name}: ${type} at ${triggerValue}`);
 
       pollerEvents.emit('incidentOpened', { monitor, incident });
-      await query(`NOTIFY ws_updates, $1`, [JSON.stringify({ type: 'incidentOpened', payload: { monitor, incident } })]);
+      await query(`SELECT pg_notify('ws_updates', $1)`, [JSON.stringify({ type: 'incidentOpened', payload: { monitor, incident } })]);
 
       if (monitor.webhook_url) {
         await this.fireWebhook(monitor, incident, 'OPENED');
@@ -93,7 +93,7 @@ export class AlertService {
       console.log(`Incident resolved for monitor ${monitor.name}`);
 
       pollerEvents.emit('incidentResolved', { monitor, incident });
-      await query(`NOTIFY ws_updates, $1`, [JSON.stringify({ type: 'incidentResolved', payload: { monitor, incident } })]);
+      await query(`SELECT pg_notify('ws_updates', $1)`, [JSON.stringify({ type: 'incidentResolved', payload: { monitor, incident } })]);
 
       if (monitor.webhook_url) {
         await this.fireWebhook(monitor, incident, 'RESOLVED');
