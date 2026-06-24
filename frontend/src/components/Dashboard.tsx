@@ -3,7 +3,10 @@ import { useWebSocket } from '../hooks/useWebSocket';
 import { MonitorCard } from './MonitorCard';
 
 export function Dashboard() {
-  const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:3001';
+  const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const defaultWsUrl = `${wsProtocol}//${window.location.host}/ws`;
+  const wsUrl = import.meta.env.VITE_WS_URL || defaultWsUrl;
+  
   const { isConnected, lastMessage } = useWebSocket(wsUrl);
   
   const [monitors, setMonitors] = useState<any[]>([]);
@@ -11,7 +14,7 @@ export function Dashboard() {
 
   useEffect(() => {
     // Fetch initial monitors
-    fetch((import.meta.env.VITE_API_URL || 'http://localhost:3001/api') + '/monitors')
+    fetch((import.meta.env.VITE_API_URL || '/api') + '/monitors')
       .then(res => res.json())
       .then(data => setMonitors(data))
       .catch(err => console.error('Error fetching monitors', err));
