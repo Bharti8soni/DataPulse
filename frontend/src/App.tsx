@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { Activity, Bell, Settings, LayoutDashboard } from 'lucide-react';
 import { Dashboard } from './components/Dashboard';
+import { Incidents } from './components/Incidents';
 
 function App() {
   return (
@@ -29,8 +30,8 @@ function App() {
         <main className="main-content">
           <Routes>
             <Route path="/" element={<Dashboard />} />
-            <Route path="/incidents" element={<div>Incidents View (Coming Soon)</div>} />
-            <Route path="/settings" element={<div>Settings (Coming Soon)</div>} />
+            <Route path="/incidents" element={<Incidents />} />
+            <Route path="/settings" element={<div className="glass-panel" style={{ padding: '3rem', textAlign: 'center' }}><p className="text-muted">Global Settings (Coming Soon)</p></div>} />
           </Routes>
         </main>
       </div>

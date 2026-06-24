@@ -1,7 +1,8 @@
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 import { useState, useEffect } from 'react';
+import { Trash2 } from 'lucide-react';
 
-export function MonitorCard({ monitor, metrics }: { monitor: any, metrics: any }) {
+export function MonitorCard({ monitor, metrics, onDelete }: { monitor: any, metrics: any, onDelete?: () => void }) {
   const [history, setHistory] = useState<any[]>([]);
 
   useEffect(() => {
@@ -21,9 +22,28 @@ export function MonitorCard({ monitor, metrics }: { monitor: any, metrics: any }
 
   const isFailing = metrics?.latestCheck && !metrics.latestCheck.success;
 
+  const handleDelete = async () => {
+    if (!window.confirm(`Are you sure you want to delete ${monitor.name}?`)) return;
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || '/api';
+      await fetch(`${apiUrl}/monitors/${monitor.id}`, { method: 'DELETE' });
+      if (onDelete) onDelete();
+    } catch (err) {
+      console.error('Failed to delete monitor', err);
+    }
+  };
+
   return (
-    <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+    <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', position: 'relative' }}>
+      <button 
+        onClick={handleDelete}
+        style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', color: '#8b949e', cursor: 'pointer' }}
+        title="Delete Monitor"
+      >
+        <Trash2 size={16} />
+      </button>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingRight: '1.5rem' }}>
         <div>
           <h3 style={{ fontSize: '1.1rem', marginBottom: '0.25rem' }}>{monitor.name}</h3>
           <a href={monitor.url} target="_blank" rel="noreferrer" className="text-sm text-muted">{monitor.url}</a>

@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { MonitorCard } from './MonitorCard';
+import { AddMonitorModal } from './AddMonitorModal';
 
 export function Dashboard() {
   const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -11,14 +12,18 @@ export function Dashboard() {
   
   const [monitors, setMonitors] = useState<any[]>([]);
   const [liveMetrics, setLiveMetrics] = useState<Record<number, any>>({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    // Fetch initial monitors
+  const fetchMonitors = useCallback(() => {
     fetch((import.meta.env.VITE_API_URL || '/api') + '/monitors')
       .then(res => res.json())
       .then(data => setMonitors(data))
       .catch(err => console.error('Error fetching monitors', err));
   }, []);
+
+  useEffect(() => {
+    fetchMonitors();
+  }, [fetchMonitors]);
 
   useEffect(() => {
     if (lastMessage?.type === 'metricsUpdated') {
@@ -40,7 +45,7 @@ export function Dashboard() {
             {isConnected ? 'Live WebSocket Connected' : 'Connecting to live feed...'}
           </p>
         </div>
-        <button className="btn btn-primary">+ Add Monitor</button>
+        <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>+ Add Monitor</button>
       </header>
 
       {monitors.length === 0 ? (
@@ -54,10 +59,17 @@ export function Dashboard() {
               key={monitor.id} 
               monitor={monitor} 
               metrics={liveMetrics[monitor.id]} 
+              onDelete={fetchMonitors}
             />
           ))}
         </div>
       )}
+
+      <AddMonitorModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSuccess={fetchMonitors} 
+      />
     </div>
   );
 }
